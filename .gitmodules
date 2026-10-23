@@ -1,0 +1,3 @@
+[submodule "core"]
+	path = core
+	url = git@github.com:HughKim87/Agent-Core.git
