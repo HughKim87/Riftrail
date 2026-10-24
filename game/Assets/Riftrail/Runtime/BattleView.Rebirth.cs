@@ -13,8 +13,8 @@ namespace Riftrail
         public bool IsRebirthOpen => rebirthRoot != null && rebirthRoot.gameObject.activeSelf;
         private void BuildRebirth()
         {
-            rebirthEntry = MakeButton(contentRoot,"RebirthButton",.76f,.961f,180,82,Green,OpenRebirth,out _);
-            rebirthEntry.fontSize=26;
+            rebirthEntry = MakeButton(contentRoot,"RebirthButton",.78f,.961f,170,120,Green,OpenRebirth,out _);
+            rebirthEntry.fontSize=34;
             rebirthRoot=Rect(contentRoot,"RebirthMenu"); Stretch(rebirthRoot);
             rebirthRoot.gameObject.AddComponent<CanvasGroup>().ignoreParentGroups=true;
             var backdrop=Panel(rebirthRoot,"Backdrop",Hex(0x102C2C)); Stretch(backdrop.rectTransform); backdrop.raycastTarget=true;

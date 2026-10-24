@@ -22,6 +22,9 @@ namespace Riftrail
             var args = Environment.GetCommandLineArgs();
             if (Array.IndexOf(args, "-riftrail-smoke") < 0) yield break;
             active = true;
+            // Drive this opt-in fixture only through its synthetic events, not desktop input.
+            var desktopInput=EventSystem.current==null?null:EventSystem.current.GetComponent<StandaloneInputModule>();
+            if(desktopInput!=null)desktopInput.enabled=false;
             Application.logMessageReceived += OnLog;
             battle = GetComponent<AutoBattleController>().Battle;
             battle.Attacked += OnAttack;
@@ -166,6 +169,7 @@ namespace Riftrail
                 if(capture!=null)CaptureOffscreen(Path.Combine(Path.GetDirectoryName(capture),"boss-exit.png"));
             }
             while (battle.Stage == 1 && Time.realtimeSinceStartup < deadline) yield return null;
+            Debug.Log($"RIFTRAIL progression snapshot: priorFailure {failed}, stage {battle.Stage}, bosses {battle.BossesCleared}, level {battle.UpgradeLevel}/{testedLevel}, auto {battle.AutomaticGrowth}.");
             var passed = !failed && attacks > 0
                 && battle.Stage == 2 && battle.BossesCleared == 1 && battle.UpgradeLevel == testedLevel;
             if (passed && capture != null) CaptureTraitPreviews(Path.GetDirectoryName(capture));
@@ -222,7 +226,7 @@ namespace Riftrail
         private bool AllKorean()
         {
             foreach(var label in GetComponentsInChildren<Text>(true))
-                if(System.Text.RegularExpressions.Regex.IsMatch(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(label.text,@"<[^>]*>",""),@"(?<=\d)[KMGTPE]",""),"[A-Za-z]")) {Debug.LogError("Untranslated UI: "+label.text);return false;}
+                if(System.Text.RegularExpressions.Regex.IsMatch(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(label.text,@"<[^>]*>",""),@"(?<=\d)[KMGTPE]|(?<=%)p",""),"[A-Za-z]")) {Debug.LogError("Untranslated UI: "+label.text);return false;}
             return true;
         }
         private IEnumerator CheckSettingsAndRelics(string capture)

@@ -25,14 +25,14 @@ namespace Riftrail
             rewardHeading=Label(rewardCard,"",30,Green,.5f,.9f,880,55);
             for(var i=0;i<3;i++)
             {
-                var icon=Rect(rewardCard,"RewardIcon"+i);Anchor(icon,.14f,.66f,125,125);rewardIcons[i]=icon;
+                var icon=Rect(rewardCard,"RewardIcon"+i);Anchor(icon,.5f,.71f,125,125);icon.localScale=Vector3.one*.72f;rewardIcons[i]=icon;
                 OvalAt(icon,"Disc",i==0?Hex(0xC5906D):i==1?Hex(0x90BEAB):Gold,0,0,120,120);
                 if(i==0) {var blade=Box(icon,"Blade",Cream,0,5,19,80);blade.rectTransform.localRotation=Quaternion.Euler(0,0,-25);}
                 else if(i==1) OvalAt(icon,"Feather",Cream,0,0,30,85);
                 else OvalAt(icon,"Coin",Hex(0xBC8A39),0,0,50,50);
             }
-            rewardName=Label(rewardCard,"",40,Ink,.62f,.71f,660,70);
-            rewardCount=Label(rewardCard,"",29,Muted,.62f,.58f,660,55);
+            rewardName=Label(rewardCard,"",40,Ink,.5f,.71f,660,70);rewardName.alignment=TextAnchor.MiddleLeft;
+            rewardCount=Label(rewardCard,"",29,Muted,.5f,.565f,880,55);
             rewardBonus=Label(rewardCard,"",33,Green,.5f,.43f,880,65);
             rewardActual=Label(rewardCard,"",27,Ink,.5f,.28f,880,55);
             rewardIncrease=Label(rewardCard,"",25,Muted,.5f,.12f,880,55);
@@ -54,6 +54,11 @@ namespace Riftrail
             rewardRoot.SetAsLastSibling();rewardRoot.gameObject.SetActive(true);
             rewardHeading.text=data.Count==1?"새로운 유물 발견!":"중복 유물 · 영구 효과 강화!";
             rewardName.text=RelicCatalog.Name(data.Kind);
+            var nameWidth=Mathf.Min(660,rewardName.preferredWidth);
+            rewardName.rectTransform.sizeDelta=new Vector2(nameWidth+2,70);
+            rewardName.rectTransform.anchoredPosition=new Vector2(55,0);
+            // Center the icon/name pair as one heading, keeping a consistent 20-unit gap.
+            for(var i=0;i<rewardIcons.Length;i++)rewardIcons[i].anchoredPosition=new Vector2(-nameWidth*.5f-10,0);
             rewardCount.text=data.Count==1?"첫 발견 · 보유 1개":$"보유 {Number(data.Count-1)}개 → {Number(data.Count)}개";
             rewardBonus.text=$"{RelicCatalog.Effect(data.Kind,data.Count-1)} → {RelicCatalog.Effect(data.Kind,data.Count)}";
             var label=data.Kind==RelicKind.Blade?"최종 공격력":data.Kind==RelicKind.Feather?"총 공격속도":"총 골드 배율";

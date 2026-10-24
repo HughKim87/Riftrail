@@ -16,6 +16,7 @@ namespace Riftrail
             public Vector2 Start, End;
             public float Age, Duration, Arc;
             public bool Combat;
+            public RectTransform Target;
         }
         private readonly List<Effect> effects = new List<Effect>();
         private readonly List<UnityEngine.Object> artResources = new List<UnityEngine.Object>();
@@ -23,10 +24,10 @@ namespace Riftrail
         private BattleSimulation renderedSimulation;
         private CanvasGroup monsterAlpha, contentInteraction;
         private float strikeDuration = .30f;
-        private RectTransform safeRoot, contentRoot, arena, hero, sword, monster, slime, guardian;
+        private RectTransform safeRoot, contentRoot, arena, hero, sword, monster, slime, guardian, walletIcon;
         private Image slimeBody, guardianBody, healthFill, timerFill;
         private Text stageText, goldText, enemyName, healthText, timerText, stateText;
-        private Text bossText, progressText;
+        private Text bossText, bossDetailText, progressText;
         private GameAudio sound;
         private Button bossButton;
         private readonly Image[] milestones = new Image[5];
@@ -71,20 +72,20 @@ namespace Riftrail
             Anchor(contentRoot,.5f,.5f,1080,1920);
             FitContent();
             arena = Rect(contentRoot,"DuelField");
-            Anchor(arena,.5f,.7916667f,1080,800);
+            Anchor(arena,.5f,.7864583f,1080,820);
             arena.gameObject.AddComponent<RectMask2D>();
             BuildLandscape();
-            enemyName = Label(arena,"",34,Cream,.5f,.79f,950,50);
+            enemyName = Label(arena,"",44,Cream,.5f,.80f,1000,65);
             var healthTrack = Panel(arena,"EnemyHealth",Hex(0x203C37));
-            Anchor(healthTrack.rectTransform,.5f,.735f,660,16);
+            Anchor(healthTrack.rectTransform,.5f,.73f,760,48);
             healthFill = Panel(healthTrack.rectTransform,"HealthFill",Hex(0xE8B568));
             Stretch(healthFill.rectTransform);
-            healthText = Label(arena,"",25,Cream,.5f,.695f,800,36);
+            healthText = Label(healthTrack.rectTransform,"",32,Color.white,.5f,.5f,940,48);
             var timeTrack = Panel(arena,"BossTimer",new Color(0,0,0,.15f));
-            Anchor(timeTrack.rectTransform,.5f,.665f,650,5);
+            Anchor(timeTrack.rectTransform,.5f,.685f,760,8);
             timerFill = Panel(timeTrack.rectTransform,"TimeRemaining",Red);
             Stretch(timerFill.rectTransform);
-            timerText = Label(arena,"",22,Cream,.5f,.615f,980,65);
+            timerText = Label(arena,"",30,Cream,.5f,.625f,1000,84);
 
             hero = Rect(arena,"SwordMaster");
             Anchor(hero,.5f,.5f,220,300);
@@ -97,23 +98,25 @@ namespace Riftrail
             guardian = Rect(monster,"GuardianArt"); Stretch(guardian);
             guardianBody = BuildGuardian(guardian);
             BuildMonsterLooks();
-            stateText = Label(arena,"",23,Cream,.5f,.14f,960,70);
+            stateText = Label(arena,"",30,Cream,.5f,.225f,1000,60);
 
 
-            progressText = Label(contentRoot,"",23,Hex(0xBDD1B1),.31f,.605f,580,45);
+            progressText = Label(contentRoot,"보스 발견",34,Cream,.64f,.628f,200,55);
             for (var i=0;i<milestones.Length;i++)
             {
-                milestones[i] = Oval(contentRoot,"HuntProgress"+i,Hex(0x38524B),17,17);
-                Anchor(milestones[i].rectTransform,.72f+i*.043f,.605f,17,17);
+                milestones[i] = Oval(contentRoot,"HuntProgress"+i,Hex(0x38524B),32,32);
+                Anchor(milestones[i].rectTransform,.77f+i*.046f,.628f,32,32);
             }
-            stageText = Label(contentRoot,"",29,Cream,.265f,.961f,500,84);
-            stageText.alignment=TextAnchor.MiddleLeft;
+            stageText = Label(contentRoot,"",42,Cream,.26f,.961f,510,84);
+            stageText.alignment=TextAnchor.MiddleLeft;stageText.fontStyle=FontStyle.Bold;
 
             if (EventSystem.current == null)
                 new GameObject("BattleEventSystem",typeof(EventSystem),typeof(StandaloneInputModule)).transform.SetParent(transform,false);
             BuildGrowth();
-            bossText = MakeButton(contentRoot,"BossButton",.5f,.5573f,1000,90,Hex(0xA85A3E),challenge,out bossButton);
-            bossText.fontSize = 26;
+            bossText = MakeButton(contentRoot,"BossButton",.5f,.574f,1080,130,Gold,challenge,out bossButton);
+            Anchor(bossText.rectTransform,.285f,.5f,540,110);bossText.fontSize=62;bossText.fontStyle=FontStyle.Bold;bossText.color=Ink;
+            bossDetailText=Label(bossButton.transform,"",32,Ink,.755f,.5f,440,110);
+            bossDetailText.alignment=TextAnchor.MiddleLeft;
             BuildRebirth();
             BuildMenus();
             BuildRelicReward();
@@ -260,23 +263,25 @@ namespace Riftrail
             RenderOfflineReward(s);
             ApplyArea(s.Stage);
             var boss = s.Encounter == EncounterKind.Boss;
-            stageText.text = $"{s.Stage:00} 스테이지\n{areaName}";
-            goldText.text = $"{Number(s.Gold)} 골드";
+            stageText.text = $"{s.Stage:00} {areaName}";
+            goldText.text = Number(s.Gold);
             enemyName.text = (boss ? (s.IsEliteBoss ? "정예 보스 · " : "보스 · ") : "") + s.Enemy.Name;
             healthText.text = $"체력 {Number(s.Enemy.Health)} / {Number(s.Enemy.MaxHealth)}" + (s.Enemy.Shield>0?$" · 보호막 {Number(s.Enemy.Shield)}":"");
             healthFill.rectTransform.anchorMax = new Vector2((float)(s.Enemy.Health+s.Enemy.Shield)/(s.Enemy.MaxHealth+s.Enemy.MaxShield),1);
+            healthText.color=Color.white;
             healthFill.color = boss ? Hex(0xE58F66) : Gold;
             timerFill.transform.parent.gameObject.SetActive(boss || s.Enemy.Kind == MonsterKind.Goblin);
             timerFill.rectTransform.anchorMax = new Vector2((float)(boss ? s.BossTimeRemaining/BattleSimulation.BossDuration : s.GoblinTimeRemaining/BattleSimulation.GoblinEscapeTime),1);
             timerFill.color = boss ? Red : Gold;
             timerText.text = MonsterDescription(s);
             stateText.text = s.IsPaused ? "잠시 쉬는 중" : s.Phase == BattlePhase.Escaped ? "고블린이 도망쳤습니다!" : s.Phase == BattlePhase.Defeat ? "시간 초과 · 사냥으로 돌아갑니다"
-                : s.Phase == BattlePhase.Victory ? (boss ? "보스 처치! 다음 지역으로 이동합니다" : s.LastKillWasBonus ? "빠른 처치! 골드 두 배" : "골드를 획득했습니다") : HeroDescription(s.Hero);
-            progressText.text = boss ? $"보스 보상 +{Number(s.BossReward)} 골드" : $"보스 발견 {s.FarmKills} / {BattleSimulation.RequiredKills}";
+                : s.Phase == BattlePhase.Victory ? (boss ? "보스 처치! 다음 지역으로 이동합니다" : s.LastKillWasBonus ? "빠른 처치! 골드 두 배" : "") : "";
+            progressText.text = boss ? "보스 전투" : "보스 발견";
             for (var i=0;i<milestones.Length;i++) milestones[i].color = i<s.FarmKills ? Gold : Hex(0x38524B);
             bossButton.interactable = s.CanChallengeBoss || s.CanAbandonBoss;
-            bossText.text = boss ? (s.Phase == BattlePhase.Fighting ? "보스 도전 포기 · 일반 사냥으로 돌아가기" : s.Phase==BattlePhase.Victory ? "다음 지역으로 이동 중…" : "도전 실패 · 일반 사냥으로 돌아갑니다")
-                : s.FarmKills < BattleSimulation.RequiredKills ? $"몬스터 {BattleSimulation.RequiredKills-s.FarmKills}마리 처치 후 자동 보스 도전" : $"보스 재도전 >\n권장 공격력 {Number(s.BossTargetPower)} · {(s.HasBossPower ? "준비 완료" : "강화가 필요해요")}";
+            bossText.text = boss ? (s.Phase==BattlePhase.Fighting?"보스 포기":s.Phase==BattlePhase.Victory?"지역 이동":"도전 종료") : "보스 도전";
+            bossDetailText.text = boss ? (s.Phase==BattlePhase.Fighting?$"남은 시간 {s.BossTimeRemaining:0.0}초\n일반 사냥으로 복귀":s.Phase==BattlePhase.Victory?"다음 지역으로\n이동합니다":"일반 사냥으로\n돌아갑니다")
+                : $"권장 공격력 {Number(s.BossTargetPower)}\n{(s.FarmKills<BattleSimulation.RequiredKills?$"{BattleSimulation.RequiredKills-s.FarmKills}마리 후 자동 도전":s.HasBossPower?"도전 가능":"강화 권장 · 도전 가능")}";
             for (var i=0;i<enemyLooks.Length;i++) enemyLooks[i].gameObject.SetActive(i == (int)s.Enemy.Kind);
             strike = Mathf.Max(0,strike-delta);
             hit = Mathf.Max(0,hit-delta);
@@ -288,7 +293,7 @@ namespace Riftrail
             {
                 var travel=Mathf.Clamp01((float)((1.5-s.TransitionRemaining-.2)/1.3));
                 hero.anchoredPosition=new Vector2(Mathf.Lerp(-285,900,travel),-95+Mathf.Abs(Mathf.Sin(travel*30))*15);
-                stateText.text=s.LastRelicDrop.HasValue?$"{RelicCatalog.Name(s.LastRelicDrop.Value)} 획득!\n다음 지역으로 이동합니다":"보스 처치! 다음 지역으로 이동합니다";
+                stateText.text=s.LastRelicDrop.HasValue?$"{RelicCatalog.Name(s.LastRelicDrop.Value)} 획득! 다음 지역으로 이동합니다":"보스 처치! 다음 지역으로 이동합니다";
             }
             hero.localRotation = Quaternion.Euler(0,0,leaving?Mathf.Sin(clock*20)*3:-swing*7);
             sword.localRotation = Quaternion.Euler(0,0,-18-swing*(s.Hero == HeroKind.Kunoichi ? 70 : 110));
@@ -356,8 +361,11 @@ namespace Riftrail
             AddEffect(text.rectTransform,new Vector2(180,-180),new Vector2(180,-80),1.1f);
             for (var i=0;i<5;i++)
             {
-                var coin = Oval(arena,"LootCoin",Gold,20,25);
-                AddEffect(coin.rectTransform,new Vector2(145+i*20,-120),new Vector2(190,400),.7f+i*.08f,60+i*10);
+                // Use the shared UI root so the flight is not clipped by the battlefield mask.
+                var coin = Oval(contentRoot,"LootCoin",Gold,24,28);
+                var start=(Vector2)contentRoot.InverseTransformPoint(monster.TransformPoint(new Vector3(-35+i*20,-120,0)));
+                var flight=AddEffect(coin.rectTransform,start,(Vector2)contentRoot.InverseTransformPoint(walletIcon.position),.7f+i*.08f,60+i*10);
+                flight.Target=walletIcon;
             }
         }
 
@@ -430,10 +438,11 @@ namespace Riftrail
             }
         }
 
-        private void AddEffect(RectTransform root,Vector2 start,Vector2 end,float duration,float arc=0)
+        private Effect AddEffect(RectTransform root,Vector2 start,Vector2 end,float duration,float arc=0)
         {
             root.anchoredPosition = start;
-            effects.Add(new Effect { Root=root, Alpha=root.gameObject.AddComponent<CanvasGroup>(), Start=start, End=end, Duration=duration, Arc=arc });
+            var effect=new Effect { Root=root, Alpha=root.gameObject.AddComponent<CanvasGroup>(), Start=start, End=end, Duration=duration, Arc=arc };
+            effects.Add(effect);return effect;
         }
         private void ClearEffects(bool combatOnly)
         {
@@ -450,6 +459,7 @@ namespace Riftrail
             {
                 var e=effects[i]; e.Age+=delta;
                 var p=e.Age/e.Duration;
+                if(e.Target!=null)e.End=(Vector2)((RectTransform)e.Root.parent).InverseTransformPoint(e.Target.position);
                 e.Root.anchoredPosition=Vector2.Lerp(e.Start,e.End,p)+Vector2.up*Mathf.Sin(p*Mathf.PI)*e.Arc;
                 e.Alpha.alpha=1-p*p;
                 if (p<1) continue;

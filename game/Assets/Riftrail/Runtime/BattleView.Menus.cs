@@ -20,8 +20,8 @@ namespace Riftrail
         }
         private void BuildMenus()
         {
-            var settings=MakeButton(contentRoot,"SettingsButton",.93f,.961f,110,82,Hex(0x506B63),()=>OpenMenu(settingsRoot),out _);settings.text="설정";settings.fontSize=26;
-            relicEntry=MakeButton(contentRoot,"RelicsButton",.58f,.961f,140,82,Hex(0x7A6545),()=>OpenMenu(relicRoot),out _);relicEntry.fontSize=25;
+            var settings=MakeButton(contentRoot,"SettingsButton",.94f,.961f,120,120,Hex(0x506B63),()=>OpenMenu(settingsRoot),out _);settings.text="설정";settings.fontSize=34;
+            relicEntry=MakeButton(contentRoot,"RelicsButton",.60f,.961f,170,120,Hex(0x7A6545),()=>OpenMenu(relicRoot),out _);relicEntry.fontSize=34;
             settingsRoot=Menu("SettingsMenu","설정",()=>CloseMenu(settingsRoot),out _);
             Label(settingsRoot,"소리",36,Cream,.5f,.74f,900,80);
             soundText=MakeButton(settingsRoot,"SoundToggle",.5f,.65f,800,125,Green,()=>
