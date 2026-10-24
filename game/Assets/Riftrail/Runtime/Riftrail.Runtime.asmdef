@@ -1,0 +1,5 @@
+{
+  "name": "Riftrail.Runtime",
+  "rootNamespace": "Riftrail",
+  "references": ["Unity.ugui"]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Riftrail.Editor",
+  "rootNamespace": "Riftrail.Editor",
+  "references": ["Riftrail.Runtime"],
+  "includePlatforms": ["Editor"]
+}

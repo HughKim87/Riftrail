@@ -13,3 +13,28 @@ dist/
 build/
 .DS_Store
 Thumbs.db
+
+# Unity generated files (project lives in game/).
+/game/[Ll]ibrary/
+/game/[Tt]emp/
+/game/[Oo]bj/
+/game/[Ll]ogs/
+/game/[Uu]ser[Ss]ettings/
+/game/[Bb]uild/
+/game/[Bb]uilds/
+/game/.vs/
+/game/.idea/
+/game/*.csproj
+/game/*.sln
+/game/*.slnx
+/game/*.user
+/game/*.pidb
+/game/*.pdb
+/game/*.mdb
+/work/
+
+# Local previews, generated builds, research captures and Unity recovery scenes.
+/outputs/
+/game/Assets/_Recovery/
+/game/Assets/_Recovery.meta
+
